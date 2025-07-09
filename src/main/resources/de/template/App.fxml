@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.scene.control.Button?>
+<?import javafx.scene.control.Label?>
+<?import javafx.scene.layout.AnchorPane?>
+
+<AnchorPane xmlns:fx="http://javafx.com/fxml/1" xmlns="http://javafx.com/javafx/8.0.171" 
+    fx:id="anchorPane" prefHeight="768" prefWidth="1024" fx:controller="de.template.FXMLController">
+    <children>
+        <Button layoutX="26" layoutY="90" onAction="#handleButton0Action" text="TMS = 0" />
+        <Button layoutX="26" layoutY="120" onAction="#handleButton1Action" text="TMS = 1" />
+        <!--<Label  fx:id="label" layoutX="26" layoutY="150" minHeight="16" minWidth="69" />-->
+
+        <Button fx:id="tdi0TMS0Button" layoutX="26" layoutY="150" onAction="#handleButtonTDI0TMS0Action" text="TDI=0, TMS=0" />
+        <Button fx:id="tdi1TMS0Button" layoutX="26" layoutY="180" onAction="#handleButtonTDI1TMS0Action" text="TDI=1, TMS=0" />
+
+        <Button fx:id="tdi0TMS1Button" layoutX="26" layoutY="210" onAction="#handleButtonTDI0TMS1Action" text="TDI=0, TMS=1" />
+        <Button fx:id="tdi1TMS1Button" layoutX="26" layoutY="240" onAction="#handleButtonTDI1TMS1Action" text="TDI=1, TMS=1" />
+    </children>
+</AnchorPane>
