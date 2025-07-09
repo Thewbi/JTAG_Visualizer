@@ -9,8 +9,14 @@
             "name": "App",
             "request": "launch",
             "mainClass": "de.template.App",
-            "projectName": "template",
-            //"vmArgs": "--module-path \"/opt/javafx-sdk-20/lib\" --add-modules javafx.controls,javafx.fxml"
+            "projectName": "JTAGVisualizer"
+        },
+        {
+            "type": "java",
+            "name": "App",
+            "request": "launch",
+            "mainClass": "de.template.App",
+            "projectName": "JTAGVisualizer",
             "vmArgs": "--module-path \"C:/Users/lapto/Downloads/openjfx-20.0.2_windows-x64_bin-sdk/javafx-sdk-20.0.2/lib\" --add-modules javafx.controls,javafx.fxml"
         },
         {
@@ -24,8 +30,7 @@
             "name": "App",
             "request": "launch",
             "mainClass": "de.template.App",
-            "projectName": "template",
-            //"vmArgs": "--module-path \"/opt/javafx-sdk-20/lib\" --add-modules javafx.controls,javafx.fxml"
+            "projectName": "JTAGVisualizer",
             "vmArgs": "--module-path \"C:/Users/lapto/Downloads/openjfx-20.0.2_windows-x64_bin-sdk/javafx-sdk-20.0.2/lib\" --add-modules javafx.controls,javafx.fxml"
         }
     ]

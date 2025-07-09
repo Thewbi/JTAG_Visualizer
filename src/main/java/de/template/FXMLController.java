@@ -19,7 +19,11 @@ public class FXMLController {
 
     //TODO: add a custom data register and implement capture, data shifting and updating
 
+    // instruction to select the IDCODE register
     private static final int IDCODE = 0x7f;
+
+    // instruction to select the CUSTOM_1 register
+    private static final int CUSTOM_1 = 0x01;
 
     @FXML
     private AnchorPane anchorPane;
@@ -44,6 +48,9 @@ public class FXMLController {
 
     private Register idcodeShiftRegister = new Register();
     private Register idcodeDataRegister = new Register();
+
+    private Register custom1ShiftRegister = new Register();
+    private Register custom1DataRegister = new Register();
 
     private Map<Integer, Register> instructionMap = new HashMap<>();
 
@@ -83,71 +90,54 @@ public class FXMLController {
 
     @FXML
     private void handleButton0Action(ActionEvent event) {
-
-        //System.out.println("You clicked TMS = 0");
-        //label.setText("You clicked TMS = 0");
-
-        for (State state : stateList) {
-            if (state.current) {
-                state.exit();
-                State nextState = state.getNextStateForInput(0);
-                nextState.enter();
-                break;
-            }
-        }
-
+        int tms = 0;
+        transitionToNextState(tms);
     }
 
     @FXML
     private void handleButton1Action(ActionEvent event) {
-
-        //System.out.println("You clicked TMS = 1");
-        //label.setText("You clicked TMS = 1");
-
-        for (State state : stateList) {
-            if (state.current) {
-                state.exit();
-                State nextState = state.getNextStateForInput(1);
-                nextState.enter();
-                break;
-            }
-        }
-
+        int tms = 1;
+        transitionToNextState(tms);
     }
 
     @FXML
     public void handleButtonTDI0TMS0Action(ActionEvent event) {
-
-        State currentState = null;
-        for (State state : stateList) {
-            if (state.current) {
-                currentState = state;
-                break;
-            }
-        }
-
-        if (currentState.name.equalsIgnoreCase("Shift IR")) {
-            int value = irShiftRegister.getValue();
-            value >>= 1;
-            value = value | (0 << 7);
-            irShiftRegister.setValue(value);
-        }
-
-        State nextState = null;
-        for (State state : stateList) {
-            if (state.current) {
-                state.exit();
-                nextState = state.getNextStateForInput(0);
-                nextState.enter();
-                break;
-            }
-        }
-
+        State currentState = getCurrentState();
+        int data = 0;
+        shiftInTDI(currentState, data);
+        int tms = 0;
+        transitionToNextState(tms);
     }
 
     @FXML
     public void handleButtonTDI1TMS0Action(ActionEvent event) {
+        State currentState = getCurrentState();
+        int data = 1;
+        shiftInTDI(currentState, data);
+        int tms = 0;
+        transitionToNextState(tms);
+    }
 
+    @FXML
+    public void handleButtonTDI0TMS1Action(ActionEvent event) {
+        State currentState = getCurrentState();
+        int data = 0;
+        shiftInTDI(currentState, data);
+        int tms = 1;
+        transitionToNextState(tms);
+    }
+
+    @FXML
+    public void handleButtonTDI1TMS1Action(ActionEvent event) {
+        State currentState = getCurrentState();
+        int data = 1;
+        shiftInTDI(currentState, data);
+        int tms = 1;
+        transitionToNextState(tms);
+    }
+
+    private State getCurrentState() {
+        // find current state
         State currentState = null;
         for (State state : stateList) {
             if (state.current) {
@@ -155,45 +145,41 @@ public class FXMLController {
                 break;
             }
         }
+        return currentState;
+    }
+
+    private void transitionToNextState(int tms) {
+        for (State state : stateList) {
+            if (state.current) {
+                state.exit();
+                State nextState = state.getNextStateForInput(tms);
+                nextState.enter();
+                break;
+            }
+        }
+    }
+
+    private void shiftInTDI(State currentState, int data) {
 
         if (currentState.name.equalsIgnoreCase("Shift IR")) {
+
             int value = irShiftRegister.getValue();
             value >>= 1;
-            value = value | (1 << 7);
+            value = value | (data << 7);
             irShiftRegister.setValue(value);
-        }
+            
+        } else if (currentState.name.equalsIgnoreCase("Shift DR")) {
 
-        for (State state : stateList) {
-            if (state.current) {
-                state.exit();
-                State nextState = state.getNextStateForInput(0);
-                nextState.enter();
-                break;
-            }
-        }
-    }
+            // load the instruction from the IR register
+            int instruction = irDataRegister.getValue();
 
-    @FXML
-    public void handleButtonTDI0TMS1Action(ActionEvent event) {
-        for (State state : stateList) {
-            if (state.current) {
-                state.exit();
-                State nextState = state.getNextStateForInput(1);
-                nextState.enter();
-                break;
-            }
-        }
-    }
+            // find the (data) register that is identified by the instruction
+            Register register = instructionMap.get(instruction);
 
-    @FXML
-    public void handleButtonTDI1TMS1Action(ActionEvent event) {
-        for (State state : stateList) {
-            if (state.current) {
-                state.exit();
-                State nextState = state.getNextStateForInput(1);
-                nextState.enter();
-                break;
-            }
+            int value = register.getShiftRegister().getValue();
+            value >>= 1;
+            value = value | (data << 7);
+            register.getShiftRegister().setValue(value);
         }
     }
 
@@ -205,6 +191,7 @@ public class FXMLController {
         tdi1TMS1Button.setDisable(true);
 
         instructionMap.put(IDCODE, idcodeDataRegister);
+        instructionMap.put(CUSTOM_1, custom1DataRegister);
 
         int offsetX = 800;
         int offsetY = 10;
@@ -241,6 +228,24 @@ public class FXMLController {
         idcodeDataRegister.setPosition(offsetX + 10, offsetY + 60);
         idcodeDataRegister.setShiftRegister(idcodeShiftRegister);
         anchorPane.getChildren().add(idcodeDataRegister.getRectangle());
+
+        offsetX = 800;
+        offsetY = 310;
+
+        custom1ShiftRegister.name = "Shift CUSTOM 1";
+        custom1ShiftRegister.current = false;
+        custom1ShiftRegister.instruction = 0x00;
+        custom1ShiftRegister.setPosition(offsetX + 10, offsetY);
+        custom1ShiftRegister.setShiftRegister(custom1ShiftRegister);
+        anchorPane.getChildren().add(custom1ShiftRegister.getRectangle());
+
+        custom1DataRegister.name = "Data CUSTOM 1";
+        custom1DataRegister.current = false;
+        custom1DataRegister.instruction = CUSTOM_1;
+        custom1DataRegister.setValue(0x00);
+        custom1DataRegister.setPosition(offsetX + 10, offsetY + 60);
+        custom1DataRegister.setShiftRegister(custom1ShiftRegister);
+        anchorPane.getChildren().add(custom1DataRegister.getRectangle());
 
         offsetX = 200;
         offsetY = 10;
@@ -295,7 +300,10 @@ public class FXMLController {
 
                 irShiftRegister.deactivate();
 
+                // get the instruction from the IR register
                 int instruction = irDataRegister.getValue();
+
+                // retrieve the (data) register referenced by the instruction and activate it
                 Register register = instructionMap.get(instruction);
                 register.getShiftRegister().activate();
             }
@@ -332,10 +340,18 @@ public class FXMLController {
 
             @Override
             public void onEnter() {
+
                 irShiftRegister.deactivate();
 
+                // load data from data register into the shift register
+
+                // load the instruction from the IR register
                 int instruction = irDataRegister.getValue();
+
+                // find the (data) register that is identified by the instruction
                 Register register = instructionMap.get(instruction);
+
+                // load the content of the data register into the shift register
                 int value = register.getValue();
                 register.getShiftRegister().setValue(value);
             }
@@ -492,6 +508,28 @@ public class FXMLController {
         updateDRState.setPosition(offsetX + 10, offsetY + 570);
         anchorPane.getChildren().add(updateDRState.getRectangle());
 
+        updateDRState.addEventListener(new StateEventListener() {
+
+            @Override
+            public void onEnter() {
+
+                // load the instruction from the IR register
+                int instruction = irDataRegister.getValue();
+
+                // find the (data) register that is identified by the instruction
+                Register register = instructionMap.get(instruction);
+
+                // load the content of the data register into the shift register
+                int value = register.getShiftRegister().getValue();
+                register.setValue(value);
+            }
+
+            @Override
+            public void onExit() {
+                // nothing
+            }
+
+        });
 
         row = 8;
 
