@@ -1,3 +1,7 @@
+# JTAG Visualizer
+
+![image info](./res/MainScreen.png)
+
 # javafx_maven_template
 
 JavaFX maven template

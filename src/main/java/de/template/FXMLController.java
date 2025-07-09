@@ -17,7 +17,7 @@ import javafx.scene.text.Text;
 
 public class FXMLController {
 
-    TODO: add a custom data register and implement capture, data shifting and updating
+    //TODO: add a custom data register and implement capture, data shifting and updating
 
     private static final int IDCODE = 0x7f;
 
